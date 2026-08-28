@@ -21,9 +21,15 @@ export class VisualPipelineValidationError extends Error {
 const evaluationSchema = {
   type: 'object',
   additionalProperties: false,
-  required: ['visualEvaluation', 'decision'],
+  required: ['visualEvaluation', 'correctionObjectives', 'imageWideProblem', 'decision'],
   properties: {
     visualEvaluation: { type: 'string', minLength: 1 },
+    correctionObjectives: {
+      type: 'array',
+      items: { type: 'string', minLength: 1 },
+      maxItems: 10,
+    },
+    imageWideProblem: { type: 'boolean' },
     decision: { type: 'string', enum: VISUAL_PIPELINE_DECISIONS },
   },
 } as const;
@@ -63,14 +69,40 @@ function requireExactKeys(value: Record<string, unknown>, expected: string[], re
   }
 }
 
-function parseEvaluation(value: unknown): Pick<VisualPipelineResult, 'visualEvaluation' | 'decision'> {
+interface ParsedEvaluation extends Pick<VisualPipelineResult, 'visualEvaluation' | 'decision'> {
+  correctionObjectives: string[];
+  imageWideProblem: boolean;
+}
+
+function normalizeDecision(correctionObjectives: string[], imageWideProblem: boolean): VisualPipelineDecision {
+  if (imageWideProblem || correctionObjectives.length >= 2) return 'FAIL';
+  if (correctionObjectives.length === 1) return 'PASS WITH ONE CORRECTION';
+  return 'PASS';
+}
+
+function parseEvaluation(value: unknown): ParsedEvaluation {
   if (!isRecord(value)) throw new VisualPipelineValidationError('LM Studio returned an invalid evaluation object.');
-  requireExactKeys(value, ['visualEvaluation', 'decision'], 'evaluation');
+  requireExactKeys(value, ['visualEvaluation', 'correctionObjectives', 'imageWideProblem', 'decision'], 'evaluation');
   const visualEvaluation = requireText(value.visualEvaluation, 'Visual Evaluation');
   if (typeof value.decision !== 'string' || !VISUAL_PIPELINE_DECISIONS.includes(value.decision as VisualPipelineDecision)) {
     throw new VisualPipelineValidationError('LM Studio returned an unknown decision. Expected PASS, PASS WITH ONE CORRECTION, or FAIL.');
   }
-  return { visualEvaluation, decision: value.decision as VisualPipelineDecision };
+  if (!Array.isArray(value.correctionObjectives)) {
+    throw new VisualPipelineValidationError('LM Studio returned invalid correction objectives.');
+  }
+  const correctionObjectives = value.correctionObjectives.map((objective, index) =>
+    requireText(objective, `Correction Objective ${index + 1}`),
+  );
+  if (typeof value.imageWideProblem !== 'boolean') {
+    throw new VisualPipelineValidationError('LM Studio returned an invalid image-wide problem flag.');
+  }
+
+  return {
+    visualEvaluation,
+    correctionObjectives,
+    imageWideProblem: value.imageWideProblem,
+    decision: normalizeDecision(correctionObjectives, value.imageWideProblem),
+  };
 }
 
 function parseImprovement(value: unknown): Pick<VisualPipelineResult, 'candidateImprovement' | 'finalEditPrompt'> {
@@ -119,6 +151,8 @@ export async function runVisualPipeline(
     userPrompt: [
       `Decision: ${evaluation.decision}`,
       `Visual Evaluation: ${evaluation.visualEvaluation}`,
+      `Correction Objectives: ${evaluation.correctionObjectives.length > 0 ? evaluation.correctionObjectives.join(' | ') : 'None'}`,
+      `Image-wide Problem: ${evaluation.imageWideProblem ? 'Yes' : 'No'}`,
       'Produce the Candidate Improvement and Final Edit Prompt for this image.',
     ].join('\n\n'),
   }));
