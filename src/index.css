@@ -1,0 +1,72 @@
+/* GALAZAR Global Styles */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Dark theme as default — calm, professional, suitable for creative work */
+    --background: 220 14% 8%;
+    --foreground: 210 20% 96%;
+    --card: 220 14% 10%;
+    --card-foreground: 210 20% 96%;
+    --popover: 220 14% 10%;
+    --popover-foreground: 210 20% 96%;
+    --primary: 210 20% 85%;
+    --primary-foreground: 220 14% 8%;
+    --secondary: 220 10% 16%;
+    --secondary-foreground: 210 20% 96%;
+    --muted: 220 10% 16%;
+    --muted-foreground: 220 8% 55%;
+    --accent: 220 10% 16%;
+    --accent-foreground: 210 20% 96%;
+    --destructive: 0 65% 45%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 220 10% 18%;
+    --input: 220 10% 18%;
+    --ring: 210 20% 70%;
+    --radius: 0.5rem;
+    --sidebar-background: 220 14% 7%;
+    --sidebar-foreground: 210 20% 80%;
+    --sidebar-primary: 210 20% 85%;
+    --sidebar-primary-foreground: 220 14% 8%;
+    --sidebar-accent: 220 10% 14%;
+    --sidebar-accent-foreground: 210 20% 96%;
+    --sidebar-border: 220 10% 16%;
+    --sidebar-ring: 210 20% 70%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.25);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.4);
+}
+
+/* Selection */
+::selection {
+  background: hsl(var(--primary) / 0.25);
+}
