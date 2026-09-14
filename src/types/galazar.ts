@@ -778,6 +778,7 @@ export interface AppState {
 export type ViewId =
   | 'prompt-builder'
   | 'visual-pipeline'
+  | 'image-generator'
   | 'projects'
   | 'saved-builds'
   | 'variants'
