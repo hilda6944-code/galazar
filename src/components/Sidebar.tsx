@@ -8,6 +8,7 @@ import {
   Layers,
   GitBranch,
   ScanSearch,
+  Sparkles,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -18,6 +19,7 @@ interface SidebarProps {
 const views: { id: ViewId; label: string; icon: React.ReactNode }[] = [
   { id: 'prompt-builder', label: 'Prompt Builder', icon: <PenTool className="w-4 h-4" /> },
   { id: 'visual-pipeline', label: 'Visual Pipeline', icon: <ScanSearch className="w-4 h-4" /> },
+  { id: 'image-generator', label: 'Generate Image', icon: <Sparkles className="w-4 h-4" /> },
   { id: 'projects', label: 'Projects', icon: <FolderOpen className="w-4 h-4" /> },
   { id: 'saved-builds', label: 'Saved Builds', icon: <Bookmark className="w-4 h-4" /> },
   { id: 'variants', label: 'Variants', icon: <GitBranch className="w-4 h-4" /> },

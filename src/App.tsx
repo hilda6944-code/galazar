@@ -5,6 +5,7 @@ import { ProjectsPage } from '@/pages/ProjectsPage';
 import { SavedBuildsPage } from '@/pages/SavedBuildsPage';
 import { DNALibraryPage } from '@/pages/DNALibraryPage';
 import { SettingsPage } from '@/pages/SettingsPage';
+import { ImageGeneratorPage } from '@/pages/ImageGeneratorPage';
 import { ArchitecturePage } from '@/pages/ArchitecturePage';
 import { VisualPipelinePage } from '@/pages/VisualPipelinePage';
 import { VariantsPage } from '@/pages/VariantsPage';
@@ -318,6 +319,8 @@ export default function App() {
         );
       case 'visual-pipeline':
         return <VisualPipelinePage />;
+      case 'image-generator':
+        return <ImageGeneratorPage initialPrompt={state.currentBuild.prompt} />;
       case 'projects':
         return (
           <ProjectsPage
