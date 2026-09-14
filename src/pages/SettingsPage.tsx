@@ -1,8 +1,9 @@
 import { useState, type ChangeEvent } from 'react';
-import { AlertTriangle, Download, RotateCcw, Trash2 } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Download, Loader2, RotateCcw, Server, Trash2, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { parseBackup, type RestorePreview } from '@/lib/backups';
+import { checkComfyConnection, type ComfyConnectionResult } from '@/lib/comfyApi';
 import type { AppState } from '@/types/galazar';
 
 interface SettingsPageProps {
@@ -16,6 +17,18 @@ export function SettingsPage({ onClearAllData, onExportBackup, onRestoreBackup }
   const [restorePreview, setRestorePreview] = useState<RestorePreview | null>(null);
   const [restoreError, setRestoreError] = useState<string | null>(null);
   const [restoreStatus, setRestoreStatus] = useState<string | null>(null);
+  const [comfyStatus, setComfyStatus] = useState<ComfyConnectionResult | null>(null);
+  const [checkingComfy, setCheckingComfy] = useState(false);
+
+  const testComfy = async () => {
+    setCheckingComfy(true);
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 8000);
+    const result = await checkComfyConnection(controller.signal);
+    window.clearTimeout(timeout);
+    setComfyStatus(result);
+    setCheckingComfy(false);
+  };
 
   const selectBackup = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -46,9 +59,30 @@ export function SettingsPage({ onClearAllData, onExportBackup, onRestoreBackup }
 
   return (
     <div className="h-full flex flex-col">
-      <div className="mb-6"><h2 className="text-xl font-semibold">Settings</h2><p className="text-sm text-muted-foreground mt-1">GALAZAR workspace data and recovery</p></div>
+      <div className="mb-6"><h2 className="text-xl font-semibold">Settings</h2><p className="text-sm text-muted-foreground mt-1">GALAZAR workspace data, local image engine, and recovery</p></div>
 
       <div className="space-y-6 max-w-2xl overflow-y-auto">
+        <div className="rounded-lg border border-border/50 bg-card/50 p-4 space-y-3">
+          <div className="flex items-start gap-3">
+            <Server className="w-5 h-5 mt-0.5 text-muted-foreground" />
+            <div>
+              <h3 className="font-medium text-sm mb-1">Local Image Engine</h3>
+              <p className="text-xs text-muted-foreground">Connect GALAZAR to ComfyUI Desktop on this computer. ComfyUI must be open.</p>
+            </div>
+          </div>
+          <Button size="sm" onClick={testComfy} disabled={checkingComfy}>
+            {checkingComfy ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Server className="w-3.5 h-3.5 mr-1.5" />}
+            {checkingComfy ? 'Checking…' : 'Test ComfyUI Connection'}
+          </Button>
+          {comfyStatus && (
+            <div className={`flex items-center gap-2 text-xs ${comfyStatus.connected ? 'text-emerald-400' : 'text-amber-400'}`}>
+              {comfyStatus.connected ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+              <span>{comfyStatus.message}</span>
+            </div>
+          )}
+          <p className="text-[10px] text-muted-foreground/60">Local address: 127.0.0.1:8188 · No image-generation fee</p>
+        </div>
+
         <div className="rounded-lg border border-border/50 bg-card/50 p-4 space-y-3">
           <div><h3 className="font-medium text-sm mb-1">Backup &amp; Restore</h3><p className="text-xs text-muted-foreground">Export the complete browser-local workspace or restore a validated GALAZAR backup.</p></div>
           <div className="flex flex-wrap gap-2">
@@ -72,7 +106,7 @@ export function SettingsPage({ onClearAllData, onExportBackup, onRestoreBackup }
       </div>
 
       <Dialog open={restorePreview !== null} onOpenChange={(open) => !open && setRestorePreview(null)}>
-        <DialogContent><DialogHeader><DialogTitle>Restore GALAZAR Backup?</DialogTitle><DialogDescription>This replaces the complete current workspace only after browser storage accepts the restored state. GALAZAR will download a pre-restore backup first.</DialogDescription></DialogHeader>{restorePreview && <div className="rounded-md bg-muted/30 p-3 text-xs space-y-1"><p>Saved Builds: {restorePreview.summary.savedBuilds}</p><p>Projects: {restorePreview.summary.projects}</p><p>Variants: {restorePreview.summary.variants}</p><p>DNA entries: {restorePreview.summary.dnaEntries}</p><p>Engines: {restorePreview.summary.engines}</p>{restorePreview.warnings.length > 0 && <div className="pt-2 text-amber-400">{restorePreview.warnings.map((warning) => <p key={warning}>{warning}</p>)}</div>}</div>}<DialogFooter><Button variant="outline" onClick={() => setRestorePreview(null)}>Cancel</Button><Button onClick={confirmRestore}>Restore All</Button></DialogFooter></DialogContent>
+        <DialogContent><DialogHeader><DialogTitle>Restore GALAZAR Backup?</DialogTitle><DialogDescription>This replaces the complete current workspace only after browser storage accepts the restored state. GALAZAR will download a pre-restore backup first.</DialogDescription></DialogHeader>{restorePreview && <div className="rounded-md bg-muted/30 p-3 text-xs space-y-1"><p>Saved Builds: {restorePreview.summary.savedBuilds}</p><p>Projects: {restorePreview.summary.projects}</p><p>Variants: {restorePreview.summary.variants}</p><p>DNA entries: {restorePreview.summary.dnaEntries}</p><p>Engines: {restorePreview.summary.engines}</p>{restorePreview.warnings.length > 0 && <div className="pt-2 text-amber-400">{restorePreview.warnings.map((warning) => <p key={warning}>{warning}</p>)}</div>}</div>}<DialogFooter><Button variant="outline" onClick={() => setRestorePreview(null)}>Cancel</Button><Button onClick={confirmRestore}>Restore All</Button></DialogFooter>
       </Dialog>
     </div>
   );
