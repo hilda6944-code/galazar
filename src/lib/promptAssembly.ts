@@ -1233,7 +1233,7 @@ function mapPerspectiveEmphasis(emphasis: string, lens: string | null): string {
 // ─── Style DNA Prompt Assembler ───
 
 export function assembleStylePrompt(dna: StyleDNA): string {
-  if (!dna.styleMode && !dna.specificStyle && !dna.intensity && !dna.realismBalance && !dna.edgeLanguage && !dna.detailPhilosophy && !dna.formLanguage) {
+  if (!dna.selectedStyles?.length && !dna.fusionLevel && !dna.styleMode && !dna.specificStyle && !dna.intensity && !dna.realismBalance && !dna.edgeLanguage && !dna.detailPhilosophy && !dna.formLanguage) {
     return '';
   }
 
@@ -1245,7 +1245,9 @@ export function assembleStylePrompt(dna: StyleDNA): string {
   const customStyle = maybe(dna.customStyleMode);
   const customSpecific = maybe(dna.customSpecificStyle);
 
-  if (mode === 'Custom' && customStyle) {
+  if (dna.selectedStyles?.length) {
+    parts.push(`blend artistic influences: ${dna.selectedStyles.join(' + ')}`);
+  } else if (mode === 'Custom' && customStyle) {
     parts.push(customStyle);
   } else if (specific === 'Custom' && customSpecific) {
     parts.push(customSpecific);
@@ -1254,6 +1256,8 @@ export function assembleStylePrompt(dna: StyleDNA): string {
   } else if (mode && mode !== 'No Selection' && mode !== 'Custom') {
     parts.push(mapStyleMode(mode));
   }
+
+  if (dna.fusionLevel) parts.push(`visual fusion: ${dna.fusionLevel.toLowerCase()}`);
 
   // Intensity
   const intensity = maybe(dna.intensity);
