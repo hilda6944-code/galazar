@@ -480,6 +480,8 @@ export interface StyleDNA {
   styleMode: string | null;
   customStyleMode: string;
   specificStyle: string | null;
+  selectedStyles?: string[];
+  fusionLevel?: string | null;
   customSpecificStyle: string;
   intensity: string | null;
   customIntensity: string;
@@ -499,6 +501,8 @@ export function createEmptyStyleDNA(): StyleDNA {
     styleMode: null,
     customStyleMode: '',
     specificStyle: null,
+    selectedStyles: [],
+    fusionLevel: null,
     customSpecificStyle: '',
     intensity: null,
     customIntensity: '',
