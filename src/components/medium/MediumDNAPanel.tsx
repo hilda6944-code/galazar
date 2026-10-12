@@ -40,7 +40,7 @@ const TECHNIQUES: Record<string, string[]> = {
   Printmaking: ['No Selection', 'Etching', 'Engraving', 'Linocut', 'Woodcut', 'Lithograph', 'Screenprint', 'Custom'],
   'Sculptural / 3D Render': ['No Selection', 'Clay', 'Bronze', 'Marble', 'Porcelain', 'Resin', 'Digital Sculpt', 'Photoreal 3D Render', 'Stylized 3D Render', 'Custom'],
   Tempera: ['No Selection', 'Egg Tempera', 'Layered Tempera', 'Smooth Tempera', 'Custom'],
-  'Colored Pencil': ['No Selection', 'Layered Color', 'Burnished', 'Waxy Buildup', 'Loose Colored Pencil', 'Custom'],
+  'Colored Pencil': ['No Selection', 'Layered Color', 'Burnished', 'Waxy Buildup', 'Loose Colored Pencil', 'Fine Colored Pencil', 'Polychromos Layering', 'Colored Pencil + Graphite Accents', 'Custom'],
   Custom: ['No Selection', 'Custom'],
 };
 
