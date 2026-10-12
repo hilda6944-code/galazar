@@ -87,7 +87,12 @@ function SelectField({
 }
 
 export function StyleDNAPanel({ dna, onChange }: StyleDNAPanelProps) {
-  const specificOptions = SPECIFIC_STYLES[dna.styleMode ?? 'No Selection'] ?? ['No Selection'];
+  const selectedStyles = dna.selectedStyles ?? (dna.specificStyle && dna.specificStyle !== 'Custom' ? [dna.specificStyle] : []);
+  const allStyles = [...new Set(Object.values(SPECIFIC_STYLES).flat().filter((style) => style !== 'No Selection' && style !== 'Custom'))];
+  const toggleStyle = (style: string) => {
+    const next = selectedStyles.includes(style) ? selectedStyles.filter((item) => item !== style) : [...selectedStyles, style];
+    onChange({ ...dna, selectedStyles: next, specificStyle: next[0] ?? null });
+  };
 
   const update = <K extends keyof StyleDNA>(key: K, value: StyleDNA[K]) => {
     onChange({ ...dna, [key]: value });
@@ -166,4 +171,18 @@ export function StyleDNAPanel({ dna, onChange }: StyleDNAPanelProps) {
       />
     </div>
   );
-}
+}      <div className="space-y-2">
+        <label className="text-xs text-muted-foreground block">Specific Styles / Eras — select more than one</label>
+        <div className="max-h-56 overflow-y-auto rounded-md border border-input p-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {allStyles.map((style) => (
+            <label key={style} className="flex items-center gap-2 text-sm cursor-pointer">
+              <input type="checkbox" checked={selectedStyles.includes(style)} onChange={() => toggleStyle(style)} />
+              <span>{style}</span>
+            </label>
+          ))}
+        </div>
+        <button type="button" className="text-xs underline text-muted-foreground" onClick={() => onChange({ ...dna, selectedStyles: [], specificStyle: null })}>None / Clear styles</button>
+        <p className="text-xs text-muted-foreground">Selected: {selectedStyles.length ? selectedStyles.join(' + ') : 'None'}. Style Mode above is an optional guide; selections can cross eras.</p>
+      </div>
+      <SelectField label="Visual Fusion" value={dna.fusionLevel ?? null} options={['No Selection', 'Subtle', 'Balanced', 'Strong', 'Seamless Transformation']} onChange={(val) => update('fusionLevel', val)} />
+
